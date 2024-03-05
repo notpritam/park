@@ -23,6 +23,8 @@
 
 body {
   color: rgb(var(--foreground-rgb));
+  overflow: hidden;
+  overflow-y: auto;
   background: linear-gradient(
       to bottom,
       transparent,
@@ -36,4 +38,16 @@ body {
     text-wrap: balance;
   }
 
+  .marquee{
+    cursor: -webkit-grab;
+  }
+
+  .drag {
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+  }
+
+  .item {
+    user-select: none;
+  }
 }
