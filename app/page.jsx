@@ -2,10 +2,9 @@
 "use client";
 
 import { useWindowSize } from "@react-hook/window-size";
-import { useSpring, motion, inView, useInView } from "framer-motion";
-import Image from "next/image";
+import { useSpring, motion } from "framer-motion";
 import normalizeWheel from "normalize-wheel";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRafLoop } from "react-use";
 
 const _ = {
@@ -258,22 +257,22 @@ const MyMarquee = ({ x, direction, speedDetails, cardData }) => {
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
       >
-        <MarqueeItem speed={speed} direction={direction}>
+        <MarqueeItem speed={speed}>
           {cardData.map((item, index) => (
             <Card key={index} item={item} />
           ))}
         </MarqueeItem>
-        <MarqueeItem speed={speed} direction={direction}>
+        <MarqueeItem speed={speed}>
           {cardData.map((item, index) => (
             <Card key={index} item={item} />
           ))}
         </MarqueeItem>
-        <MarqueeItem speed={speed} direction={direction}>
+        <MarqueeItem speed={speed}>
           {cardData.map((item, index) => (
             <Card key={index} item={item} />
           ))}
         </MarqueeItem>{" "}
-        <MarqueeItem speed={speed} direction={direction}>
+        <MarqueeItem speed={speed}>
           {cardData.map((item, index) => (
             <Card key={index} item={item} />
           ))}
@@ -283,7 +282,7 @@ const MyMarquee = ({ x, direction, speedDetails, cardData }) => {
   );
 };
 
-const MarqueeItem = ({ children, direction, speed }) => {
+const MarqueeItem = ({ children, speed }) => {
   const item = useRef(null);
   const rect = useRef({});
   const x = useRef(0);
@@ -294,7 +293,6 @@ const MarqueeItem = ({ children, direction, speed }) => {
     if (!item.current || !rect.current) return;
 
     var xPercentage = (x.current / rect.current.width) * 100;
-    // console.log(xPercentage);
     if (xPercentage < -100) x.current = 0;
     if (xPercentage > 0) x.current = -rect.current.width;
 
