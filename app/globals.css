@@ -16,6 +16,11 @@
   }
 }
 
+*{
+  padding: 0;
+  margin: 0;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -30,4 +35,5 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
 }
