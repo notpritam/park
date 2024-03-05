@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useEffect } from "react";
 import { useMeasure } from "react-use";
 
-const data = [
+export const data = [
   {
     image:
       "https://framerusercontent.com/images/VIqlDWL1UV6azfAV9xBz0MPhw.jpeg?scale-down-to=1024",

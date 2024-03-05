@@ -2,12 +2,13 @@
 
 import { useWindowSize } from "@react-hook/window-size";
 import { useSpring, motion, inView, useInView } from "framer-motion";
+import Image from "next/image";
 import normalizeWheel from "normalize-wheel";
 import { useEffect, useRef, useState } from "react";
 import { useRafLoop } from "react-use";
+import { data } from "./scroll/page";
 
 const _ = {
-  content: "Around the world, around the world.",
   speed: 2,
   threshold: 0.014,
   wheelFactor: 1.8,
@@ -16,38 +17,31 @@ const _ = {
 
 export default function Home() {
   const isScrolling = useRef(false);
-  const constraintsRef = useRef(null);
   const x = useRef(0);
+
   const speed = useSpring(_.speed, {
-    damping: 40,
-    stiffness: 90,
-    mass: 5,
+    damping: 100,
+    stiffness: 1000,
+    mass: 1,
   });
+
+  const [currentX, setCurrentX] = useState(0);
 
   const boxRef = useRef(null);
 
-  const inView = useInView(boxRef);
-
-  const [speedEnabled, setSpeedEnabled] = useState(false);
-
-  useEffect(() => {
-    setSpeedEnabled(inView);
-  }, [inView]);
-
   const onWheel = (e) => {
-    if (speedEnabled) {
-      const normalized = normalizeWheel(e);
-      x.current = normalized.pixelY * _.wheelFactor;
+    const normalized = normalizeWheel(e);
 
-      // console.log(x.current, "this is current speed");
+    setCurrentX(normalized.pixelY * _.wheelFactor);
+    console.log("mouse wheel");
 
-      // Reset speed on scroll end
-      window.clearTimeout(isScrolling.current);
-      isScrolling.current = setTimeout(function () {
-        speed.set(_.speed);
-      }, 30);
-    }
+    // Reset speed on scroll end
+    // window.clearTimeout(isScrolling.current);
+    // isScrolling.current = setTimeout(function () {
+    //   speed.set(_.speed);
+    // }, 30);
   };
+
   return (
     <main
       className="flex flex-col max-w-screen overflow-x-hidden"
@@ -61,8 +55,21 @@ export default function Home() {
           Test
         </div>
       ))}
-      <motion.div className="main" whileInView={"visible"} ref={boxRef}>
-        <MyMarquee x={x} speed={speed} />
+      <motion.div ref={boxRef}>
+        <div className="flex gap-4 flex-col">
+          <MyMarquee
+            x={x}
+            currentX={currentX}
+            setCurrentX={setCurrentX}
+            direction="left"
+            speedDetails={{ damping: 100, stiffness: 1000, mass: 1 }}
+          />
+          <MyMarquee
+            x={x}
+            direction="left"
+            speedDetails={{ damping: 100, stiffness: 600, mass: 2 }}
+          />
+        </div>
       </motion.div>
       {Array.from({ length: 3 }).map((item, index) => (
         <div
@@ -76,7 +83,9 @@ export default function Home() {
   );
 }
 
-const MyMarquee = ({ x, speed }) => {
+const MyMarquee = ({ x, direction, speedDetails, currentX, setCurrentX }) => {
+  const speed = useSpring(_.speed, speedDetails);
+
   const marquee = useRef(null);
 
   const slowDown = useRef(false);
@@ -91,18 +100,21 @@ const MyMarquee = ({ x, speed }) => {
     speed.set(_.dragFactor * -info.delta.x);
   };
 
+  const onHover = (e, info) => {
+    speed.set(0);
+  };
+
   const onDragEnd = (e) => {
     slowDown.current = false;
     marquee.current.classList.remove("drag");
-    x.current = _.speed;
+    currentX = _.speed;
   };
 
   const loop = () => {
     if (slowDown.current || Math.abs(x.current) < _.threshold) return;
-    x.current *= 0.66;
-    console.log("regular x", x.current);
-    if (x.current < 0) {
-      x.current = Math.min(x.current, 0);
+    currentX *= 0.66;
+    if (currentX < 0) {
+      currentX = Math.min(x.current, 0);
     } else {
       x.current = Math.max(x.current, 0);
     }
@@ -114,22 +126,33 @@ const MyMarquee = ({ x, speed }) => {
   return (
     <>
       <motion.div
-        className="marquee"
+        className="marquee flex gap-4"
         ref={marquee}
         // onWheel={onWheel}
+        onHover={onHover}
+        onHoverEnd={onDragEnd}
         onDrag={onDrag}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
       >
-        <MarqueeItem content={_.content} speed={speed} />
+        <MarqueeItem speed={speed}>
+          {data.map((item, index) => (
+            <Card key={index} item={item} />
+          ))}
+        </MarqueeItem>
+        <MarqueeItem speed={speed}>
+          {data.map((item, index) => (
+            <Card key={index} item={item} />
+          ))}
+        </MarqueeItem>
       </motion.div>
     </>
   );
 };
 
-const MarqueeItem = ({ content, speed }) => {
+const MarqueeItem = ({ children, speed }) => {
   const item = useRef(null);
   const rect = useRef({});
   const x = useRef(0);
@@ -141,7 +164,7 @@ const MarqueeItem = ({ content, speed }) => {
     const xPercentage = (x.current / rect.current.width) * 100;
 
     // xPercentage = Math.max(xPercentage, -99);
-    console.log(xPercentage, "this is xPercentage");
+    // console.log(xPercentage, "this is xPercentage");
     if (xPercentage < -100) x.current = 0;
     if (xPercentage > 0) x.current = -rect.current.width;
     item.current.style.transform = `translate3d(${xPercentage}%, 0, 0)`;
@@ -152,7 +175,7 @@ const MarqueeItem = ({ content, speed }) => {
   }, [width, height]);
 
   const loop = (e) => {
-    console.log("this is speed got", speed.get());
+    // console.log("this is speed got", speed.get());
     x.current -= speed.get();
     setX();
   };
@@ -160,8 +183,29 @@ const MarqueeItem = ({ content, speed }) => {
   useRafLoop(loop, true);
 
   return (
-    <div className="item text-white text-[8rem] whitespace-nowrap" ref={item}>
-      {content}
+    <div
+      draggable={false}
+      className="item shrink-0 flex gap-4 items-center  text-white text-[8rem] whitespace-nowrap"
+      ref={item}
+    >
+      {children}
+    </div>
+  );
+};
+
+const Card = ({ item }) => {
+  return (
+    <div className="flex pointer-events-none   shrink-0 justify-center items-center gap-4">
+      <Image
+        alt={item.title}
+        height={64}
+        width={64}
+        src={item.image}
+        className="rounded-xl  "
+      />
+      <span className="text-[3rem] font-bold w-full whitespace-nowrap">
+        {item.title}
+      </span>
     </div>
   );
 };
