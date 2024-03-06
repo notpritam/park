@@ -126,7 +126,6 @@ export default function Home() {
   const x2 = useRef(0);
   const x3 = useRef(0);
   const x4 = useRef(0);
-  const boxRef = useRef(null);
 
   const onWheel = (e) => {
     const normalized = normalizeWheel(e);
@@ -159,12 +158,16 @@ export default function Home() {
           Pacific.
         </span>
       </div>
-      <motion.div ref={boxRef} className="mt-[10rem]">
+      <div className="mt-[10rem]">
         <div className="flex gap-[40px] flex-col">
           <MyMarquee
             x={x}
             direction="left"
-            speedDetails={{ damping: 200, stiffness: 500, mass: 1 }}
+            speedDetails={{
+              damping: 200,
+              stiffness: 1000,
+              mass: 1,
+            }}
             cardData={data}
           />
           <MyMarquee
@@ -182,11 +185,11 @@ export default function Home() {
           <MyMarquee
             x={x4}
             direction="right"
-            speedDetails={{ damping: 200, stiffness: 200, mass: 1 }}
+            speedDetails={{ damping: 200, stiffness: 600, mass: 1 }}
             cardData={data4}
           />
         </div>
-      </motion.div>
+      </div>
       {Array.from({ length: 2 }).map((item, index) => (
         <div
           className="h-screen text-[6rem] text-white font-thin w-full flex items-center justify-center bg-black"
@@ -229,13 +232,10 @@ const MyMarquee = ({ x, direction, speedDetails, cardData }) => {
   };
 
   const loop = () => {
-    if (slowDown.current || Math.abs(x.current) < _.threshold) return;
-    x.current *= 0.66;
-    if (x.current < 0) {
-      x.current = Math.min(x.current, 0);
-    } else {
-      x.current = Math.max(x.current, 0);
-    }
+    if (slowDown.current || Math.abs(x.current) < _.threshold) return; // to preserver a minimum speed
+
+    x.current *= 0.66; // so we gradiuallly decrease the speed to a threshold other wise it will infinitley speed
+
     if (direction === "right") {
       speed.set((_.speed + x.current) * -1);
     } else {
@@ -250,7 +250,6 @@ const MyMarquee = ({ x, direction, speedDetails, cardData }) => {
       <motion.div
         className="marquee flex gap-[30px]"
         ref={marquee}
-        onHoverEnd={onDragEnd}
         onDrag={onDrag}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
@@ -304,7 +303,6 @@ const MarqueeItem = ({ children, speed }) => {
   }, [width, height]);
 
   const loop = (e) => {
-    // console.log("this is speed got", speed.get());
     x.current -= speed.get();
     setX();
   };
