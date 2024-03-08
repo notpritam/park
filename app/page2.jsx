@@ -36,85 +36,6 @@ const data = [
   },
 ];
 
-const data3 = [
-  {
-    image:
-      "https://framerusercontent.com/images/CzfcVySzXAvy0AuiJGpGMtrpus.jpeg?scale-down-to=512",
-    title: "Zion",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/I6xwwDpEjzsZzRHm0K43uSBUTFw.jpeg?scale-down-to=1024",
-    title: "Saguro",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/xzKVdjf3wAmhNYnOArbE2UDgm8.jpeg?scale-down-to=1024",
-    title: "Josha Tree",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/Q44lHbttA8VG6mS9allIhkYAR8Y.jpeg?scale-down-to=1024",
-    title: "Cannon Beach",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/q7JcwecvpKTVhzSu8X3xeEJUmM.jpg?scale-down-to=1024",
-    title: "Grand Teton",
-  },
-];
-
-const data2 = [
-  {
-    image:
-      "https://framerusercontent.com/images/hTsiS6tZ2GARqbwWY5dIUHGtcU.jpeg?scale-down-to=1024",
-    title: "Yosemite",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/gLC4I3K6WZDH2d8LImM944p2oVw.jpeg?scale-down-to=1024",
-    title: "Catalina",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/fJDYXXbxmLW7qi3QCMfWXJRvPc.jpeg?scale-down-to=1024",
-    title: "Great Sand Dunes",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/xzKVdjf3wAmhNYnOArbE2UDgm8.jpeg?scale-down-to=1024",
-    title: "Sedona",
-  },
-  {
-    image:
-      "https://framerusercontent.com/images/NSExEw4QIpuVtifFprhP3QxjY.jpeg?scale-down-to=1024",
-    title: "Morro Bay",
-  },
-];
-
-const data4 = [
-  {
-    image: "https://www.touropia.com/gfx/b/2020/09/badlands.jpg",
-    title: "Badlands",
-  },
-  {
-    image: "https://www.touropia.com/gfx/b/2020/09/niagara_falls.jpg",
-    title: "Niagara Falls",
-  },
-  {
-    image: "https://www.touropia.com/gfx/b/2020/09/big_sur.jpg",
-    title: "Big Sur",
-  },
-  {
-    image: "https://www.touropia.com/gfx/b/2020/09/florida_keys.jpg",
-    title: "Florida Keys",
-  },
-  {
-    image: "https://www.touropia.com/gfx/b/2020/09/manhattan.jpg",
-    title: "Manhattan",
-  },
-];
-
 export default function Home() {
   return (
     <main className="flex flex-col max-w-screen overflow-x-hidden items-center text-center">
@@ -148,3 +69,82 @@ export default function Home() {
     </main>
   );
 }
+
+const MyMarquee = ({ x, direction, speedDetails, cardData }) => {
+  var initialValue = _.speed;
+
+  if (direction === "right") {
+    initialValue *= -1;
+  }
+
+  const speed = useSpring(initialValue, speedDetails);
+
+  const marquee = useRef(null);
+
+  const slowDown = useRef(false);
+
+  const onDragStart = () => {
+    slowDown.current = true;
+    marquee.current.classList.add("drag");
+    speed.set(0);
+  };
+
+  const onDrag = (e, info) => {
+    speed.set(_.dragFactor * -info.delta.x);
+  };
+
+  const onDragEnd = (e) => {
+    slowDown.current = false;
+    marquee.current.classList.remove("drag");
+    x.current = _.speed;
+  };
+
+  const loop = () => {
+    if (slowDown.current || Math.abs(x.current) < _.threshold) return; // to preserver a minimum speed
+
+    x.current *= 0.66; // so we gradiuallly decrease the speed to a threshold other wise it will infinitley speed
+
+    if (direction === "right") {
+      speed.set((_.speed + x.current) * -1);
+    } else {
+      speed.set(_.speed + x.current);
+    }
+  };
+
+  useRafLoop(loop, true);
+
+  return (
+    <>
+      <motion.div
+        className="marquee flex gap-[30px]"
+        ref={marquee}
+        onDrag={onDrag}
+        onDragEnd={onDragEnd}
+        onDragStart={onDragStart}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+      >
+        <MarqueeItem speed={speed}>
+          {cardData.map((item, index) => (
+            <Card key={index} item={item} />
+          ))}
+        </MarqueeItem>
+        <MarqueeItem speed={speed}>
+          {cardData.map((item, index) => (
+            <Card key={index} item={item} />
+          ))}
+        </MarqueeItem>
+        <MarqueeItem speed={speed}>
+          {cardData.map((item, index) => (
+            <Card key={index} item={item} />
+          ))}
+        </MarqueeItem>{" "}
+        <MarqueeItem speed={speed}>
+          {cardData.map((item, index) => (
+            <Card key={index} item={item} />
+          ))}
+        </MarqueeItem>
+      </motion.div>
+    </>
+  );
+};
