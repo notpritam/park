@@ -10,7 +10,7 @@ Check out the live demo [here](https://scroll-pied.vercel.app/) to see the marqu
 
 For a detailed step-by-step guide on how to build this marquee animation, check out the following resources:
 
-- [YouTube Video Tutorial](https://www.youtube.com/watch?v=your-video-id)
+- [YouTube Video Tutorial](https://youtu.be/tyb62Z6wkFM)
 - [Blog Post Tutorial](https://blog.notpritam.in/award-winning-marquee-animation-with-framer-motion)
 
 ## Tech Stack
